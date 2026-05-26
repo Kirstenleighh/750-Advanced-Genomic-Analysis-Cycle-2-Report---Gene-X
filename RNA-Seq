@@ -1,0 +1,81 @@
+# R
+
+if (!requireNamespace("BiocManager", quietly=TRUE))
+    install.packages("BiocManager")
+BiocManager::install("DESeq2")
+
+library(DESeq2)
+
+counts <- read.table(
+  "gene_counts.tsv",
+  header=TRUE,
+  row.names=1
+)
+
+condition <- factor(c(
+  rep("normal", 5),
+  rep("mutant", 5)
+))
+
+coldata <- data.frame(row.names=colnames(counts), condition)
+
+dds <- DESeqDataSetFromMatrix(
+  countData = counts,
+  colData = coldata,
+  design = ~ condition
+)
+
+dds <- DESeq(dds)
+res <- results(dds)
+
+# order by most significant p-value
+res <- res[order(res$padj), ]
+ summary(res)
+# order by most significant p-value
+res0.01 <- results(dds, alpha = 0.01)
+res0.01 <- res0.01[order(res0.01$padj), ]
+summary(res0.01)
+# contrasts
+resultsNames(dds)
+# MA plot
+plotMA(res)
+
+# Alternative code used for plot:
+summary(res)
+head(res[order(res$padj), ])
+
+library(ggplot2)
+
+res <- results(dds, alpha=0.01, contrast=c("condition", "mutant", "normal"))
+res_df <- as.data.frame(res)
+
+# Significance labels
+res_df$significance <- "Not Significant"
+res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange >  1] <- "Up"
+res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange < -1] <- "Down"
+res_df$significance <- factor(res_df$significance, levels=c("Up", "Down", "Not Significant"))
+
+# Remove NA rows (DESeq2 sets padj=NA for low-count genes)
+res_df <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ]
+
+# Volcano plot
+ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj), color=significance)) +
+  geom_point(alpha=0.6, size=1.5) +
+  scale_color_manual(values=c("Up"="firebrick", "Down"="steelblue", "Not Significant"="grey60")) +
+  geom_vline(xintercept=c(-1, 1), linetype="dashed", color="black", linewidth=0.4) +
+  geom_hline(yintercept=-log10(0.01), linetype="dashed", color="black", linewidth=0.4) +
+  labs(
+    title="Volcano Plot: Mutant vs Normal",
+    x="Log2 Fold Change",
+    y="-Log10 Adjusted P-value",
+    color="Regulation"
+  ) +
+  theme_minimal(base_size=13) +
+  theme(legend.position="right")
+
+
+summary(res)
+resultsNames(dds)
+plotMA(res, ylim=c(-5, 5))
+
+head(res_df[order(res_df$padj), ]) # top significant genes
