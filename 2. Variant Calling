@@ -15,7 +15,6 @@ samtools view -bS mutant.sam | \
 samtools sort -o mutant.sorted.bam # convert SAM to sorted BAM
 
 samtools index mutant.sorted.bam # index sorted BAM
-samtools flagstat mutant.sorted.bam
 
 bcftools mpileup \ # identify mutations present in mutated Gene X compared to ref
 -f GeneX_reference.fa \
@@ -23,7 +22,7 @@ mutant.sorted.bam | \
 bcftools call -mv --ploidy 1 -Ov \
 -o mutant.vcf # output generated as .vcf file
 
-grep -v "^#" mutant.vcf # grep for identification of differing SNPs between mutant and ref (normal)
+grep -v "^#" mutant.vcf # grep for identify differing SNPs between mutant and ref (normal)
 
 # One tailed Binomial testing in R for identified SNPs to assess confidence 
 
