@@ -1,0 +1,46 @@
+# Variant Calling
+
+# Ubuntu:
+
+cd gene_x # enter directory with the reference 
+bwa index GeneX_reference.fa # index the reference using bwa 
+
+bwa mem \ # align ref to mutant FASTQ files 
+GeneX_reference.fa \
+mutant_GeneX_R1.fastq \
+mutant_GeneX_R2.fastq \
+> mutant.sam # generates SAM file
+
+samtools view -bS mutant.sam | \
+samtools sort -o mutant.sorted.bam # convert SAM to sorted BAM
+
+samtools index mutant.sorted.bam # index sorted BAM
+samtools flagstat mutant.sorted.bam
+
+bcftools mpileup \ # identify mutations present in mutated Gene X compared to ref
+-f GeneX_reference.fa \
+mutant.sorted.bam | \
+bcftools call -mv --ploidy 1 -Ov \
+-o mutant.vcf # output generated as .vcf file
+
+grep -v "^#" mutant.vcf # grep for identification of differing SNPs between mutant and ref (normal)
+
+# One tailed Binomial testing in R for identified SNPs to assess confidence 
+
+# Position 493
+
+binom.test(
+  x = 95, # allele reads (mutant)
+  n = 246, # total reads at position
+  p = 0.01, # p value threshold
+  alternative = "greater"
+)
+
+# Position 531
+
+ binom.test(
+  x = 151,
+  n = 243,
+  p = 0.01,
+  alternative = "greater"
+)
