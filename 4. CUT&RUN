@@ -1,0 +1,15 @@
+# Cut&Run Analysis
+
+wc -l gene_x_binding_sites.bed # count number of binding sites 
+
+# annotate peaks with overlapping regions, comparing the two files to create a list of potential direct targets
+bedtools intersect -a cutrun/gene_x_binding_sites.bed -b annotation/genes.gff3 -wa -wb > results/cutrun_gene_overlap.txt
+
+wc -l cutrun_gene_overlap.txt # count number of overlaps between binding sites and genes 
+
+# extract genes from overlap file 
+grep -o "ID=GENE_[0-9]\+" results/cutrun_gene_overlap.txt | cut -d= -f2 | sort | uniq > results/cutrun_genes.txt
+
+head results/cutrun_genes.txt # display head of file 
+
+wc -l results/cutrun_genes.txt # count number of genes identified from cut&run overlaps (total number of direct targets)
