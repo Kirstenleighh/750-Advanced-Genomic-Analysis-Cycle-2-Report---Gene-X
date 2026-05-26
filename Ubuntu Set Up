@@ -1,0 +1,54 @@
+# Downloading dataset
+
+wget --mirror --no-parent -nd -R "index*" https://cgr.liv.ac.uk/454/acdarby/LIFE750/Life750_datasets/<MWS username>/
+
+# Ubuntu set up & installing packages 
+
+sudo apt update
+
+sudo apt install -y \
+bedtools \
+samtools \
+bcftools \
+seqtk \
+git \
+wget \
+curl \
+unzip
+
+conda install -c bioconda \
+mafft \
+bedtools \
+samtools \
+bcftools \
+gffread \
+deeptools -y
+
+# R packages 
+
+R
+
+install.packages("BiocManager")
+
+BiocManager::install(c(
+  "DESeq2",
+  "GenomicRanges",
+  "rtracklayer",
+  "ChIPseeker",
+  "clusterProfiler",
+  "EnhancedVolcano",
+  "pheatmap",
+  "org.Hs.eg.db"
+))
+
+# Create directories and move files over 
+
+mkdir GeneX
+
+mv genome.fa GeneX/genome/
+mv genes.gff3 GeneX/genome/
+mv gene_counts.tsv GeneX/rnaseq/
+mv gene_x_binding_sites.bed GeneX/cutrun/
+mv GeneX_reference.fa GeneX/genex/
+
+
