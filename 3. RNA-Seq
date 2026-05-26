@@ -35,17 +35,17 @@ res <- results(dds) # create object for results
 res <- res[order(res$padj), ] # order results by significance 
  summary(res) # summary of results in this order 
 
-# order again by significance, using specific p value threshold 0.01
+# order again by significance, using specific p-value threshold < 0.01
 res0.01 <- results(dds, alpha = 0.01)
 res0.01 <- res0.01[order(res0.01$padj), ]
 summary(res0.01)
 
 # Differential expression results 
 resultsNames(dds)
-# MA plot code if needed
+# MA plot
 plotMA(res)
 
-# Alternative code used for volcano plot:
+# Alternative plot for visualisation, volcano plot:
 summary(res)
 head(res[order(res$padj), ])
 
@@ -55,17 +55,17 @@ res <- results(dds, alpha=0.01, contrast=c("condition", "mutant", "normal"))
 res_df <- as.data.frame(res)
 
 # Significance labels for upregulation/downregulation 
-res_df$significance <- "Not Significant"
-res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange >  1] <- "Up"
-res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange < -1] <- "Down"
-res_df$significance <- factor(res_df$significance, levels=c("Up", "Down", "Not Significant"))
+res_df$significance <- "Not Significant" # label for no significance seen 
+res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange >  1] <- "Up" # upregulated, defined by p < 0.01 and log2FC > 1
+res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange < -1] <- "Down" # downregulated with p < 0.01, but log2FC of < -1 
+res_df$significance <- factor(res_df$significance, levels=c("Up", "Down", "Not Significant")) # labels for key on plot 
 
-res_df <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ] # remove na rows
+res_df <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ] # remove na rows from dataframe before plotting 
 
 # Volcano plot
 ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj), color=significance)) +
-  geom_point(alpha=0.6, size=1.5) +
-  scale_color_manual(values=c("Up"="firebrick", "Down"="steelblue", "Not Significant"="grey60")) +
+  geom_point(alpha=0.6, size=1.5) + 
+  scale_color_manual(values=c("Up"="firebrick", "Down"="steelblue", "Not Significant"="grey60")) + 
   geom_vline(xintercept=c(-1, 1), linetype="dashed", color="black", linewidth=0.4) +
   geom_hline(yintercept=-log10(0.01), linetype="dashed", color="black", linewidth=0.4) +
   labs(
@@ -77,8 +77,8 @@ ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj), color=significance)) +
   theme_minimal(base_size=13) +
   theme(legend.position="right")
 
-summary(res)
-resultsNames(dds)
+summary(res) # results summary 
+resultsNames(dds) # comparison sumary of dds 
 plotMA(res, ylim=c(-5, 5))
 
-head(res_df[order(res_df$padj), ]) # top significant genes
+head(res_df[order(res_df$padj), ]) # top significant genes (head)
