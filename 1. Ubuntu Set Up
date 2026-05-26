@@ -24,7 +24,7 @@ bcftools \
 gffread \
 deeptools -y
 
-# R packages 
+# Installing R packages 
 
 R
 
