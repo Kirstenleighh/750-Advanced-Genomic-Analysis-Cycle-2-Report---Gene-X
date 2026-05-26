@@ -1,46 +1,51 @@
 # R
 
+# Install biocmanager for DESeq2
+
 if (!requireNamespace("BiocManager", quietly=TRUE))
     install.packages("BiocManager")
 BiocManager::install("DESeq2")
 
+# load DESeq2
 library(DESeq2)
 
-counts <- read.table(
+counts <- read.table( # load counts table .tsv into R
   "gene_counts.tsv",
   header=TRUE,
   row.names=1
 )
 
-condition <- factor(c(
+condition <- factor(c( # set condition for each group, mutant and normal, 5 individuals for each
   rep("normal", 5),
   rep("mutant", 5)
 ))
 
-coldata <- data.frame(row.names=colnames(counts), condition)
+coldata <- data.frame(row.names=colnames(counts), condition) # create a dataframe for this
 
-dds <- DESeqDataSetFromMatrix(
+dds <- DESeqDataSetFromMatrix( # store dataframe, counts and condition in to dds object
   countData = counts,
   colData = coldata,
   design = ~ condition
 )
 
-dds <- DESeq(dds)
-res <- results(dds)
+dds <- DESeq(dds) # run DESeq2 analysis on dds
+res <- results(dds) # create object for results
 
 # order by most significant p-value
-res <- res[order(res$padj), ]
- summary(res)
-# order by most significant p-value
+res <- res[order(res$padj), ] # order results by significance 
+ summary(res) # summary of results in this order 
+
+# order again by significance, using specific p value threshold 0.01
 res0.01 <- results(dds, alpha = 0.01)
 res0.01 <- res0.01[order(res0.01$padj), ]
 summary(res0.01)
-# contrasts
+
+# Differential expression results 
 resultsNames(dds)
-# MA plot
+# MA plot code if needed
 plotMA(res)
 
-# Alternative code used for plot:
+# Alternative code used for volcano plot:
 summary(res)
 head(res[order(res$padj), ])
 
@@ -49,14 +54,13 @@ library(ggplot2)
 res <- results(dds, alpha=0.01, contrast=c("condition", "mutant", "normal"))
 res_df <- as.data.frame(res)
 
-# Significance labels
+# Significance labels for upregulation/downregulation 
 res_df$significance <- "Not Significant"
 res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange >  1] <- "Up"
 res_df$significance[res_df$padj < 0.01 & res_df$log2FoldChange < -1] <- "Down"
 res_df$significance <- factor(res_df$significance, levels=c("Up", "Down", "Not Significant"))
 
-# Remove NA rows (DESeq2 sets padj=NA for low-count genes)
-res_df <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ]
+res_df <- res_df[!is.na(res_df$padj) & !is.na(res_df$log2FoldChange), ] # remove na rows
 
 # Volcano plot
 ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj), color=significance)) +
@@ -72,7 +76,6 @@ ggplot(res_df, aes(x=log2FoldChange, y=-log10(padj), color=significance)) +
   ) +
   theme_minimal(base_size=13) +
   theme(legend.position="right")
-
 
 summary(res)
 resultsNames(dds)
