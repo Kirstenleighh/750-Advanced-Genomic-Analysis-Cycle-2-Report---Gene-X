@@ -1,0 +1,35 @@
+# R
+
+de_genes <- rownames(res)
+
+bound_genes <- read.table(
+  "results/cutrun_genes.txt",
+  stringsAsFactors = FALSE
+)$V1
+
+direct_targets <- intersect(de_genes, bound_genes)
+
+length(direct_targets)
+[1] 54
+
+> sig_01 <- subset(
+  res,
+  padj < 0.01 &
+  abs(log2FoldChange) > 1
+)
+
+nrow(sig_01)
+[1] 36
+> de_genes <- rownames(sig_01)
+
+bound_genes <- read.table(
+  "results/cutrun_genes.txt",
+  stringsAsFactors = FALSE
+)$V1
+
+direct_targets <- intersect(de_genes, bound_genes)
+
+length(direct_targets)
+[1] 5
+> print(direct_targets)
+[1] "GENE_0289" "GENE_0317" "GENE_0360" "GENE_0409" "GENE_0802"
