@@ -31,5 +31,6 @@ direct_targets <- intersect(de_genes, bound_genes)
 
 length(direct_targets)
 [1] 5
-> print(direct_targets)
+
+print(direct_targets)
 [1] "GENE_0289" "GENE_0317" "GENE_0360" "GENE_0409" "GENE_0802"
